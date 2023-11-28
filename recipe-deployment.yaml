@@ -1,0 +1,123 @@
+# Recipe finder
+# --------------------
+# - Deployment to launch one container of recipe finder app.
+# 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 5000
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-service
+spec:
+  type: ClusterIP
+  selector:
+    app: worker
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 5000
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  selector:
+    app: database
+  ports:
+    - port: 4000
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend-image
+        volumeMounts:
+        - mountPath: /config/.config.json
+          name: config-volume
+        ports:
+        - containerPort: 8000
+  volumes:
+  - name: config-volume
+    hostPath:
+      path: ./.config.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: worker-image
+        volumeMounts:
+        - mountPath: /config/.config.json
+          name: config-volume
+      ports:
+      - containerPort: 30001
+  volumes:
+  - name: config-volume
+    hostPath:
+      path: ./.config.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: database-image
+        volumeMounts:
+        - mountPath: /data
+          name: data-volume
+  volumes:
+  - name: data-volume
+    hostPath:
+      path: ./shared_database/data/redis
+---

@@ -1,0 +1,43 @@
+:root {
+  --background-color: #ebebeb;
+  --primary-color: #505050;
+  --header-color: rgba(79, 79, 79, .7)
+}
+
+body {
+margin: 0;
+background: no-repeat url("images/background.png");
+background-size: cover;
+background-color: var(--background-color);
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+display: flex;
+flex-direction: column;
+min-height: 100vh; /* Ensure the body takes at least the full viewport height */
+}
+
+#app-header {
+background-color: var(--header-color);
+padding: 10px;
+color: var(--background-color);
+font-size: xx-large;
+position: fixed;
+width: 100%;
+height: 5%;
+z-index: 1;
+}
+
+#app-body-wrapper {
+margin-top: calc(5% + 10px);
+flex: 1;
+padding: 20px;
+/* margin-top: 60px; Adjust the margin to accommodate the fixed header */
+color: var(--primary-color);
+overflow-y: auto; /* Enable scrolling if the content overflows */
+}

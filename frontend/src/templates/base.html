@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/x-icon">
+  <title>Recipe Finder</title>
+  {% block head %}{% endblock %}
+</head>
+
+<div id="app">
+<header id="app-header">Recipe Finder</header>
+<body>
+  <div id="app-body-wrapper">
+
+    {% block body %}{% endblock %}
+
+  </div>
+
+</body>
+</div>
+
+</html>

@@ -1,0 +1,24 @@
+#user-query {
+  display: block;
+  resize: none;
+  flex: none;
+  float: left;
+  width: 50%;
+  height: 25%;
+  background-color: var(--background-color);
+}
+
+#user-query textarea {
+  resize:inherit;
+  min-height: fit-content;
+  max-height: 50%;
+}
+
+#recipes-wrapper {
+  float: right;
+}
+
+#recipes-wrapper .recipe{
+  background-color: var(--background-color);
+  padding: 10px;
+}

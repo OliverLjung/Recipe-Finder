@@ -1,0 +1,42 @@
+version: '3'
+services:
+
+  # frontend:
+  #   build:
+  #     context: ./frontend/
+  #     dockerfile: Dockerfile
+  #   image: frontend-image
+  #   restart: unless-stopped
+  #   hostname: frontend
+  #   container_name: recipe.frontend
+  #   ports:
+  #     - "5000:8000"
+  #   volumes:
+  #     - .config.json:/config/.config.json
+  
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    image: worker-image
+    restart: always
+    depends_on:
+      - database
+    hostname: worker-service
+    container_name: recipe.worker
+    ports:
+      - "8000:8000"
+    volumes:
+      - .config.json:/config/.config.json
+      - ./worker/models:/models
+  
+  database:
+    image: redis/redis-stack:latest
+    restart: unless-stopped
+    hostname: database-service
+    container_name: recipe.database
+    ports:
+      - 6379:6379
+      - 8001:8001
+    volumes:
+      - ./shared_database/data/redis:/data

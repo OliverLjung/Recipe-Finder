@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+
+{% endblock %}
+
+{% block body %}
+    <div id="user-query">
+        <div>What's in the pantry?</div>
+        <textarea placeholder="Idea / Ingredients / Cuisine : Let inspiration flow!" autocomplete="on", autocorrect="on"></textarea>
+    </div>
+    <div id="recipes-wrapper">
+    </div>
+
+    <script>
+        async function recipes(text){
+            let response = await fetch("/fetch-recipes?" + new URLSearchParams({
+                                "user_input":text,
+                                "limit":10
+                            }), {method:"GET"})
+            console.log(response);
+            response = await response.json();
+            console.log(response);
+            const recipes_wrapper = document.getElementById("recipes-wrapper");
+            for (recipe of response){
+                console.log(recipe);
+
+                let title = recipe["title"].replaceAll("\n", '<br>');
+                let ingredients = recipe["ingredients"].replaceAll("\n", '<br>');
+                let instructions = recipe["instructions"].replaceAll("\n", '<br>');
+
+                const recipe_element = document.createElement("div");
+                recipe_element.className = "recipe";
+                recipe_element.innerHTML = `
+                <div class="recipe-title">${title}</div>
+                <div class="recipe-extended" hidden>
+                    <div class="recipe-ingredients">${ingredients}</div>
+                    <div class="recipe-instructions">${instructions}</div>
+                </div>
+                `;
+
+                recipe_element.addEventListener("click", () => {
+                    const extended_recipe = recipe_element.getElementsByClassName("recipe-extended")[0];
+                    extended_recipe.hidden = !extended_recipe.hidden;
+                })
+
+                recipes_wrapper.appendChild(recipe_element);
+            }
+        }
+        const text_area = document.querySelector("#user-query textarea");
+        text_area.addEventListener("keypress", () => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                recipes(text_area.value);
+            }
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,33 @@
+text:
+- name: ingredients
+  no_index: false
+  no_stem: false
+  sortable: false
+  weight: 1
+  withsuffixtrie: false
+- name: instructions
+  no_index: false
+  no_stem: false
+  sortable: false
+  weight: 1
+  withsuffixtrie: false
+- name: picture_link
+  no_index: false
+  no_stem: false
+  sortable: false
+  weight: 1
+  withsuffixtrie: false
+- name: content
+  no_index: false
+  no_stem: false
+  sortable: false
+  weight: 1
+  withsuffixtrie: false
+vector:
+- algorithm: FLAT
+  block_size: 1000
+  datatype: FLOAT32
+  dims: 1536
+  distance_metric: COSINE
+  initial_cap: 20000
+  name: content_vector

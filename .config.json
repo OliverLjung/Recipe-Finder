@@ -1,0 +1,11 @@
+{
+    "frontend":{
+        "port":5000,
+        "worker_url":"http://worker-service:8000"
+    },
+    "worker":{
+        "port":5000,
+        "redis_url":"redis://database-service:6379",
+        "redis_index":"recipes"
+    }
+}
