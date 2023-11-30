@@ -2,11 +2,11 @@ FROM python
 
 WORKDIR /app
 
-COPY ./requirments.txt ./requirments.txt
-RUN python -m pip install -r requirments.txt
+COPY ./requirements.txt ./requirements.txt
+RUN python -m pip install -r requirements.txt
 
 COPY ./src .
 
 EXPOSE 80
 
-ENTRYPOINT [ "gunicorn",  "main:app", "--port", "80"]
+ENTRYPOINT [ "gunicorn", "-w", "2", "-b", "0.0.0.0:80", "main:app" ]

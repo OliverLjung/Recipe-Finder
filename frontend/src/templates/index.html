@@ -20,12 +20,10 @@
                                 "user_input":text,
                                 "limit":10
                             }), {method:"GET"})
-            console.log(response);
             response = await response.json();
-            console.log(response);
             const recipes_wrapper = document.getElementById("recipes-wrapper");
+            recipes_wrapper.replaceChildren("");
             for (recipe of response){
-                console.log(recipe);
 
                 let title = recipe["title"].replaceAll("\n", '<br>');
                 let ingredients = recipe["ingredients"].replaceAll("\n", '<br>');
@@ -35,15 +33,25 @@
                 recipe_element.className = "recipe";
                 recipe_element.innerHTML = `
                 <div class="recipe-title">${title}</div>
-                <div class="recipe-extended" hidden>
+                <div class="recipe-closed">
                     <div class="recipe-ingredients">${ingredients}</div>
                     <div class="recipe-instructions">${instructions}</div>
                 </div>
                 `;
 
                 recipe_element.addEventListener("click", () => {
-                    const extended_recipe = recipe_element.getElementsByClassName("recipe-extended")[0];
-                    extended_recipe.hidden = !extended_recipe.hidden;
+                    const extended_recipe = recipe_element.children[1];
+                    if (extended_recipe.className == "recipe-closed"){
+                        const extended_recipes = document.querySelectorAll("#recipes-wrapper .recipe-extended");
+                        for (ext_rec of extended_recipes){
+                            ext_rec.className = "recipe-closed";
+                        }
+
+                        extended_recipe.className = "recipe-extended";
+                        extended_recipe.scrollIntoView({ behavior: 'smooth' });
+                    } else{
+                        extended_recipe.className = "recipe-closed";
+                    }
                 })
 
                 recipes_wrapper.appendChild(recipe_element);

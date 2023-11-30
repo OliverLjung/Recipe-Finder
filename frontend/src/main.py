@@ -2,11 +2,13 @@
 BFF for recipe finder frontend.
 """
 
-from flask import Flask, request, json, render_template, abort
+from flask import Flask, request, render_template, abort
 import requests
+import json
 
-# with open("/config/.config.json", "r") as f:
-WORKER_URL = "http://localhost:8000"
+with open("/config/.config.json", "r") as f:
+    CONFIG = json.load(f)
+    WORKER_URL = CONFIG["frontend"]["worker_url"]
 
 app = Flask("main")
 
@@ -25,6 +27,3 @@ def fetch_recipes():
     resp = requests.get(f"{WORKER_URL}/get_recipes", params={"user_input":user_input, "limit":limit})
     if resp.status_code != 200: abort(500)
     return resp.json()
-
-if __name__ == "__main__":
-    app.run(debug=True)

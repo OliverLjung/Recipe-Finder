@@ -1,24 +1,63 @@
 #user-query {
-  display: block;
+  display: inline-grid;
+  margin: 10px;
   resize: none;
   flex: none;
   float: left;
-  width: 50%;
+  width: 45%;
   height: 25%;
-  background-color: var(--background-color);
+  font-size: large;
+  color: var(--background-color);
+  background-color: var(--header-color);
 }
 
 #user-query textarea {
-  resize:inherit;
+  resize: inherit;
+  padding: 2%;
+  margin: 5%;
+  height: 100px;
   min-height: fit-content;
-  max-height: 50%;
+  max-height: max-content;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-size: large;
 }
 
 #recipes-wrapper {
-  float: right;
+  display: inline-block;
+  width: 45%;
 }
 
-#recipes-wrapper .recipe{
-  background-color: var(--background-color);
+#recipes-wrapper .recipe {
+  background-color: var(--header-color);
   padding: 10px;
+  color: var(--background-color);
+  margin: 10px;
+  font-size: x-large;
+}
+
+#recipes-wrapper .recipe-extended{
+  opacity: 1;
+  max-height: 1000px;
+  transition: opacity 0.5s, max-height 0.5s;
+  max-height: 1000px;
+  padding: 5px;
+  margin: 5px;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-size: medium;
+}
+
+#recipes-wrapper .recipe-closed{
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s, max-height 0.5s;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-size: medium;
+}
+
+#recipes-wrapper .recipe-extended .recipe-instructions{
+  margin-top: 25px;
 }
