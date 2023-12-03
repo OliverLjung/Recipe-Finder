@@ -16,30 +16,18 @@
     <div id="add-recipe" class="hidden">
         <form id="add-recipe-form" action="/add-recipe" method="post">
             <div class="row">
-                <div class="col-25">
-                    <label for="new-title">Title*</label>
-                </div>
-                <div class="col-75">
-                    <input type="text" id="new-title" name="title" placeholder="Recipe Title" required>
-                </div>
+                <label for="new-title">Title*</label>
+                <input type="text" id="new-title" name="title" placeholder="Recipe Title" required>
             </div>
 
             <div class="row">
-                <div class="col-25">
-                    <label for="new-ingredients">Ingredients*</label>
-                </div>
-                <div class="col-75">
-                    <input type="text" id="new-ingredients" name="ingredients" placeholder="Recipe Ingredients" required>
-                </div>
+                <label for="new-ingredients">Ingredients*</label>
+                <textarea rows="5" id="new-ingredients" name="ingredients" placeholder="Recipe Ingredients" required onkeydown="return form_handler(event)"></textarea>
             </div>
 
             <div class="row">
-                <div class="col-25">
-                    <label for="new-instructions">Instructions*</label>
-                </div>
-                <div class="col-75">
-                    <input type="text" id="new-instructions" name="instructions" placeholder="Recipe Instructions" required>
-                </div>
+                <label for="new-instructions">Instructions*</label>
+                <textarea rows="5" id="new-instructions" name="instructions" placeholder="Recipe Instructions" required onkeydown="return form_handler(event)"></textarea>
             </div>
             
             <div class="row">
@@ -51,6 +39,35 @@
     </div>
 
     <script>
+        function form_handler(){
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (event.shiftKey){
+                    var text_area = event.target;
+                    text_area.value = text_area.value.substring(0, text_area.selectionStart) + "\n" + text_area.value.substring(text_area.selectionEnd);
+                    text_area.selectionEnd = text_area.selectionStart;
+                } else {
+                    var form = document.getElementById("add-recipe-form");
+                    if(form.checkValidity()) {
+                        form.submit();
+                    } else {
+                        form.reportValidity();
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script>
+        const add_recipe_form = document.getElementById("add-recipe");
+        window.addEventListener("click", () => {
+            if (!add_recipe_form.contains(event.target)) {
+                if (!event.target.matches('#add-recipe-btn')){
+                    add_recipe_form.className = "hidden";
+                }
+            }
+        })
+        
         const add_recipe_btn = document.getElementById("add-recipe-btn");
         add_recipe_btn.addEventListener("click", () => {
             const add_recipe_form = document.getElementById("add-recipe");
@@ -109,10 +126,16 @@
         text_area.addEventListener("keypress", () => {
             if (event.key === "Enter") {
                 event.preventDefault();
-                if (event.ctrlKey) {
-                    text_area.value += "\n";
+                if (event.shiftKey) {
+                    text_area.value = text_area.value.substring(0, text_area.selectionStart) + "\n" + text_area.value.substring(text_area.selectionEnd);
+                    text_area.selectionEnd = text_area.selectionStart;
                 } else {
-                    recipes(text_area.value);
+                    if (text_area.value.length > 1){
+                        recipes(text_area.value);
+                    } else {
+                        text_area.setCustomValidity('The input is empty. Please enter some text to search the recipes.');
+                        text_area.reportValidity();
+                    }
                 }
             }
         })

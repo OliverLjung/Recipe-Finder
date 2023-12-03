@@ -29,9 +29,7 @@ services:
     volumes:
       - ./config/config.json:/config/config.json
       - ./worker/models:/models
-    # ports:
-    #   - "8000:8000"
-  
+
   database:
     image: redis/redis-stack:latest
     restart: unless-stopped
@@ -39,8 +37,3 @@ services:
     container_name: recipe.database
     volumes:
       - ./shared_database/data/redis:/data
-    # ports:
-    #   - "6379:6379"
-    #   - "8001:8001"
-
-# /c/Users/ollie/OneDrive/Documents/GitHub/Recipe-Finder/

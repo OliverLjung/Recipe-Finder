@@ -38,7 +38,7 @@ spec:
   selector:
     app: database
   ports:
-    - port: 6379
+    - port: 6000
       targetPort: 6379
 ---
 apiVersion: v1
@@ -52,7 +52,7 @@ data:
             "worker_url":"http://worker-service:7000"
         },
         "worker":{
-            "redis_url":"redis://database-service:6379",
+            "redis_url":"redis://database-service:6000",
             "redis_index":"recipes"
         }
     }
@@ -61,49 +61,57 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: data-pv
+  labels:
+    type: local
 spec:
+  storageClassName: manual
   capacity:
-    storage: 1Gi
-  volumeMode: Filesystem
+    storage: 5Gi
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteMany
   hostPath:
-    path: "C:\\Users\\ollie\\OneDrive\\Documents\\GitHub\\Recipe-Finder\\shared_database\\data\\redis"
+    path: /run/desktop/mnt/host/c/Users/ollie/OneDrive/Documents/GitHub/Recipe-Finder/shared_database/data/redis
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: data-pvc
 spec:
+  storageClassName: manual
+  volumeName: data-pv
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteMany
   resources:
     requests:
-      storage: 1Gi
+      storage: 3Gi
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: model-pv
+  labels:
+    type: local
 spec:
+  storageClassName: manual
   capacity:
-    storage: 1Gi
-  volumeMode: Filesystem
+    storage: 5Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "C:\\Users\\ollie\\OneDrive\\Documents\\GitHub\\Recipe-Finder\\worker\\models"
+    path: /run/desktop/mnt/host/c/Users/ollie/OneDrive/Documents/GitHub/Recipe-Finder/worker/models
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: model-pvc
 spec:
+  storageClassName: manual
+  volumeName: model-pv
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 3Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -122,7 +130,6 @@ spec:
       containers:
         - name: frontend
           image: localhost:5000/frontend-image:latest
-          imagePullPolicy: Always
           volumeMounts:
             - mountPath: /config
               name: config-volume
@@ -150,7 +157,6 @@ spec:
       containers:
         - name: worker
           image: localhost:5000/worker-image:latest
-          imagePullPolicy: Always
           volumeMounts:
             - mountPath: /config
               name: config-volume
@@ -187,7 +193,7 @@ spec:
             - mountPath: /data
               name: data-volume
           ports:
-            - containerPort: 6379
+            - containerPort: 6000
       volumes:
         - name: data-volume
           hostPath:

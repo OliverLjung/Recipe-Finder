@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import json
 import time
+from urllib.parse import urlparse
 import subprocess
 import typing
 from langchain.vectorstores import Redis
@@ -22,27 +23,31 @@ class Recipe(BaseModel):
     instructions: str
     picture_link: str | None = None
 
+def wait_for_redis():
+    t = time.time()
+    while (time.time() - t) < 30*60:
+        # wait for database
+        try:
+            o = urlparse(REDIS_URL)
+            output = subprocess.check_output(["redis-cli", "-h", str(o.hostname),
+                                            "-p", str(o.port), "ping"])
+            if output.decode().strip() == "PONG":
+                return
+        except subprocess.CalledProcessError:
+            time.sleep(1)
+            continue
+        time.sleep(1)
+    print("Redis connection time-out exceeded")
+    quit()
+
+wait_for_redis()
+
 embedder = HuggingFaceEmbeddings(
     model_name="sentence-transformers/multi-qa-mpnet-base-dot-v1",
     cache_folder="/models",
     model_kwargs={'device': 'cpu'},
     encode_kwargs={'normalize_embeddings': False}
 )
-
-def wait_for_redis():
-    t = time.time()
-    while (time.time() - t) < 30:
-        # wait for database
-        try:
-            output = subprocess.check_output(["redis-cli", "-h", "recipe.database", "ping"])
-            if output.decode().strip() == "PONG":
-                return
-        except subprocess.CalledProcessError:
-            continue
-    print("Redis connection time-out exceeded")
-    quit()
-
-wait_for_redis()
 
 rds = Redis.from_existing_index(
     embedder,
