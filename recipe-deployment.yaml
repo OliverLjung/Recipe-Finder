@@ -13,9 +13,8 @@ spec:
     app: frontend
   ports:
     - name: http
-      port: 8000
-      targetPort: 5000
-      protocol: TCP
+      port: 80
+      targetPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -27,20 +26,84 @@ spec:
     app: worker
   ports:
     - name: http
-      port: 3000
-      targetPort: 5000
-      protocol: TCP
+      port: 7000
+      targetPort: 8000
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: database-service
 spec:
+  type: ClusterIP
   selector:
     app: database
   ports:
-    - port: 4000
+    - port: 6379
       targetPort: 6379
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map
+data:
+  config.json: |
+    {
+        "frontend":{
+            "worker_url":"http://worker-service:7000"
+        },
+        "worker":{
+            "redis_url":"redis://database-service:6379",
+            "redis_index":"recipes"
+        }
+    }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: "C:\\Users\\ollie\\OneDrive\\Documents\\GitHub\\Recipe-Finder\\shared_database\\data\\redis"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: model-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "C:\\Users\\ollie\\OneDrive\\Documents\\GitHub\\Recipe-Finder\\worker\\models"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -57,17 +120,18 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: frontend
-        image: frontend-image
-        volumeMounts:
-        - mountPath: /config/.config.json
-          name: config-volume
-        ports:
-        - containerPort: 8000
-  volumes:
-  - name: config-volume
-    hostPath:
-      path: ./.config.json
+        - name: frontend
+          image: localhost:5000/frontend-image:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /config
+              name: config-volume
+          ports:
+            - containerPort: 80
+      volumes:
+        - name: config-volume
+          configMap:
+            name: config-map
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -84,17 +148,23 @@ spec:
         app: worker
     spec:
       containers:
-      - name: worker
-        image: worker-image
-        volumeMounts:
-        - mountPath: /config/.config.json
-          name: config-volume
-      ports:
-      - containerPort: 30001
-  volumes:
-  - name: config-volume
-    hostPath:
-      path: ./.config.json
+        - name: worker
+          image: localhost:5000/worker-image:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /config
+              name: config-volume
+            - mountPath: /models
+              name: models-volume
+          ports:
+            - containerPort: 7000
+      volumes:
+        - name: config-volume
+          configMap:
+            name: config-map
+        - name: models-volume
+          persistentVolumeClaim:
+            claimName: model-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -111,13 +181,15 @@ spec:
         app: database
     spec:
       containers:
-      - name: database
-        image: database-image
-        volumeMounts:
-        - mountPath: /data
-          name: data-volume
-  volumes:
-  - name: data-volume
-    hostPath:
-      path: ./shared_database/data/redis
----
+        - name: database
+          image: redis/redis-stack:latest
+          volumeMounts:
+            - mountPath: /data
+              name: data-volume
+          ports:
+            - containerPort: 6379
+      volumes:
+        - name: data-volume
+          hostPath:
+          persistentVolumeClaim:
+            claimName: data-pvc

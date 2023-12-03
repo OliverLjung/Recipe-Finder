@@ -11,8 +11,56 @@
         <div>What's in the pantry?</div>
         <textarea placeholder="Idea / Ingredients / Cuisine : Let inspiration flow!" autocomplete="on", autocorrect="on"></textarea>
     </div>
-    <div id="recipes-wrapper">
+    <div id="recipes-wrapper"></div>
+    <button id="add-recipe-btn">Add Recipe</button>
+    <div id="add-recipe" class="hidden">
+        <form id="add-recipe-form" action="/add-recipe" method="post">
+            <div class="row">
+                <div class="col-25">
+                    <label for="new-title">Title*</label>
+                </div>
+                <div class="col-75">
+                    <input type="text" id="new-title" name="title" placeholder="Recipe Title" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-25">
+                    <label for="new-ingredients">Ingredients*</label>
+                </div>
+                <div class="col-75">
+                    <input type="text" id="new-ingredients" name="ingredients" placeholder="Recipe Ingredients" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-25">
+                    <label for="new-instructions">Instructions*</label>
+                </div>
+                <div class="col-75">
+                    <input type="text" id="new-instructions" name="instructions" placeholder="Recipe Instructions" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-25">
+                    <input type="submit" value="Submit" id="add-recipe-submit">
+                </div>
+            </div>
+        </form>
     </div>
+
+    <script>
+        const add_recipe_btn = document.getElementById("add-recipe-btn");
+        add_recipe_btn.addEventListener("click", () => {
+            const add_recipe_form = document.getElementById("add-recipe");
+            if (add_recipe_form.className == "hidden"){
+                add_recipe_form.className = "visible";
+            } else {
+                add_recipe_form.className = "hidden";
+            }
+        })
+    </script>
 
     <script>
         async function recipes(text){
@@ -61,7 +109,11 @@
         text_area.addEventListener("keypress", () => {
             if (event.key === "Enter") {
                 event.preventDefault();
-                recipes(text_area.value);
+                if (event.ctrlKey) {
+                    text_area.value += "\n";
+                } else {
+                    recipes(text_area.value);
+                }
             }
         })
     </script>

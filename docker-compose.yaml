@@ -5,7 +5,7 @@ services:
     build:
       context: ./frontend/
       dockerfile: Dockerfile
-    image: frontend-image
+    image: localhost:5000/frontend-image
     restart: unless-stopped
     depends_on:
       - worker
@@ -14,21 +14,23 @@ services:
     ports:
       - "80:80"
     volumes:
-      - .config.json:/config/.config.json
+      - ./config/config.json:/config/config.json
   
   worker:
     build:
       context: ./worker
       dockerfile: Dockerfile
-    image: worker-image
+    image: localhost:5000/worker-image
     restart: unless-stopped
     depends_on:
       - database
     hostname: worker-service
     container_name: recipe.worker
     volumes:
-      - .config.json:/config/.config.json
+      - ./config/config.json:/config/config.json
       - ./worker/models:/models
+    # ports:
+    #   - "8000:8000"
   
   database:
     image: redis/redis-stack:latest
@@ -37,3 +39,8 @@ services:
     container_name: recipe.database
     volumes:
       - ./shared_database/data/redis:/data
+    # ports:
+    #   - "6379:6379"
+    #   - "8001:8001"
+
+# /c/Users/ollie/OneDrive/Documents/GitHub/Recipe-Finder/

@@ -5,12 +5,13 @@ A service that manages requests for recipes.
 from fastapi import FastAPI
 from pydantic import BaseModel
 import json
-import os
+import time
+import subprocess
 import typing
 from langchain.vectorstores import Redis
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
-with open("/config/.config.json", "r") as f:
+with open("/config/config.json", "r") as f:
     CONFIG = json.load(f)
     REDIS_URL = CONFIG["worker"]["redis_url"]
     REDIS_INDEX = CONFIG["worker"]["redis_index"]
@@ -28,6 +29,21 @@ embedder = HuggingFaceEmbeddings(
     encode_kwargs={'normalize_embeddings': False}
 )
 
+def wait_for_redis():
+    t = time.time()
+    while (time.time() - t) < 30:
+        # wait for database
+        try:
+            output = subprocess.check_output(["redis-cli", "-h", "recipe.database", "ping"])
+            if output.decode().strip() == "PONG":
+                return
+        except subprocess.CalledProcessError:
+            continue
+    print("Redis connection time-out exceeded")
+    quit()
+
+wait_for_redis()
+
 rds = Redis.from_existing_index(
     embedder,
     index_name=REDIS_INDEX,
@@ -37,7 +53,7 @@ rds = Redis.from_existing_index(
 
 app = FastAPI()
 
-@app.post("/add_recipe/")
+@app.post("/add_recipe")
 async def add_recipe(recipe: Recipe):
     text = recipe.title
     metadata = {
@@ -55,7 +71,9 @@ async def add_recipe(recipe: Recipe):
         embeddings = [embedding],
     )
 
-@app.get("/get_recipes/")
+    return {}, 200
+
+@app.get("/get_recipes")
 async def get_recipes(user_input: str = "French Recipe", limit: int = 10):
 
     recipes_raw = rds.similarity_search(user_input, k=limit, return_metadata=True)
