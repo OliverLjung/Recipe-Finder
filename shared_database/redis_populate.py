@@ -29,14 +29,6 @@ metadata = list(df[["ingredients", "instructions", "picture_link"]].apply(lambda
     }, axis=1).values)
 embeddings = list(df["embedding"].values)
 
-print(texts[:2])
-print(metadata[:2])
-print(embeddings[:2])
-
-print(type(texts[1]))
-print((metadata[1]["ingredients"]))
-print(type(embeddings[1]))
-
 rds.add_texts(
     texts = texts,
     metadatas = metadata,

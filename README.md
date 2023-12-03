@@ -9,8 +9,16 @@ Credit to Ryan Lee [Eigth Box. _"Recipe Box"_. 2022](https://eightportions.com/d
 I used the best ranked model in [Sentence Transformers (sBERT)](https://huggingface.co/sentence-transformers/multi-qa-mpnet-base-dot-v1) for semantic search.
 
 ## Deployment
+### [OPTIONAL] Populate database
+* this requires some packages to be installed.
+```bash
+$ docker run -d -p 6379:6379 -p 8001:8001 -v $(pwd)/data/redis:/data redis/redis-stack:latest
+$ cd shared_database/
+$ python redis_populate.py
+```
+
 ### Configuration
-start by changing the `recipe-deployment.yaml` volumes' hostPaths to where you store your redis `dump.rdb` for `data-pv` and `sentence-transformers_multi-qa-mpnet-base-dot-v1` for `model-pv`.
+Start by changing the `recipe-deployment.yaml` volumes' hostPaths to where you store your redis `dump.rdb` for `data-pv` and `sentence-transformers_multi-qa-mpnet-base-dot-v1` for `model-pv`.
 
 ### Deploy
 Start the local-registry:
@@ -33,6 +41,12 @@ $ kubectl apply -f recipe-deployment.yaml
 or alternative:
 ```bash
 $ docker compose up
+```
+
+### Delete
+To delete the deployment:
+```bash
+$ kubectl delete --cascade='foreground' -f recipe-deployment.yaml
 ```
 
 ## Questions
